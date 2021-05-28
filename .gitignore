@@ -1,3 +1,7 @@
 /private
+<<<<<<< HEAD
 data/*
+=======
+data/
+>>>>>>> 1e7663f1b395083dbb8ec1528f94d4cb46ed5623
 auto_run.sh
