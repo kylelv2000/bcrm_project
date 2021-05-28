@@ -12,6 +12,12 @@ os.chdir(sys.path[0])
 r = requests.get(
     'https://portal.pku.edu.cn/portal2017/publicsearch/canteen/retrCarteenInfos.do')
 a = json.loads(r.text)
+f1 = open('../data/latest.json', 'r')
+fro_a = json.loads(f1.read())
+if(a['time']==fro_a['time']):
+    f1.close()
+    sys.exit()
+f1.close()
 
 f2 = open('../data/latest.json', 'w')
 f2.write(json.dumps(a))
