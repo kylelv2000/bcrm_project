@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import time
 import requests
 import pandas as pd
 import sqlite3
@@ -12,9 +11,10 @@ os.chdir(sys.path[0])
 r = requests.get(
     'https://portal.pku.edu.cn/portal2017/publicsearch/canteen/retrCarteenInfos.do')
 a = json.loads(r.text)
+# 似乎到23：58会停止更新（判断一下和之前是否相同
 f1 = open('../data/latest.json', 'r')
 fro_a = json.loads(f1.read())
-if(a['time']==fro_a['time']):
+if(a['time'] == fro_a['time']):
     f1.close()
     sys.exit()
 f1.close()
