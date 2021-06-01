@@ -1,8 +1,6 @@
 import os
 import sys
 import json
-import time
-import requests
 import pandas as pd
 import sqlite3
 import datetime
@@ -17,7 +15,7 @@ df = pd.DataFrame(a['rows'], index=[a['time']]*len(a['rows']))
 df.drop(df.columns[3], axis=1, inplace=True)
 
 
-conn = sqlite3.connect(sys.path[0]+'/../data/shows.db')
+conn = sqlite3.connect(sys.path[0]+'/../data/shows.db', check_same_thread=False)
 curs = conn.cursor()
 
 
@@ -47,6 +45,7 @@ def delOldData():
                 row[1], '%Y-%m-%d %H:%M:%S')
             if(dateTime_p+delta > now_dt):
                 curs.execute("DELETE FROM forecast WHERE ID < %d;" % row[0])
+                conn.commit()
                 return
             cnt = cnt+1
             mx_id = max(mx_id, row[0])
@@ -55,11 +54,13 @@ def delOldData():
             return
         else:
             curs.execute("DELETE FROM forecast WHERE ID <= %d;" % mx_id)
+            conn.commit()
 
 
 delOldData()
 # 删除未来预测信息，重新预测
 curs.execute("DELETE FROM forecast WHERE DATETIME > '%s';" % str(now_dt))
+conn.commit()
 
 # 对于未来获取历史信息来预测
 for rows in df.itertuples():
@@ -131,8 +132,7 @@ for rows in df.itertuples():
             + str(seat)+","\
             + str(delta) +\
             ")"
-    #print(SQL)
-    curs.execute(SQL)
+        curs.execute(SQL)
+        conn.commit()
 
-conn.commit()
 conn.close()

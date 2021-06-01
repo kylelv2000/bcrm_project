@@ -30,7 +30,7 @@ df.drop(df.columns[3], axis=1, inplace=True)  # 删除多余信息
 # print(df)
 
 # 连接数据库
-conn = sqlite3.connect(sys.path[0]+'/../data/shows.db')
+conn = sqlite3.connect(sys.path[0]+'/../data/shows.db', check_same_thread=False)
 #print("Opened database successfully")
 # 创建游标
 curs = conn.cursor()
