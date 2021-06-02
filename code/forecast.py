@@ -15,7 +15,8 @@ df = pd.DataFrame(a['rows'], index=[a['time']]*len(a['rows']))
 df.drop(df.columns[3], axis=1, inplace=True)
 
 
-conn = sqlite3.connect(sys.path[0]+'/../data/shows.db', check_same_thread=False)
+conn = sqlite3.connect(
+    sys.path[0]+'/../data/shows.db', check_same_thread=False)
 curs = conn.cursor()
 
 
@@ -66,7 +67,30 @@ conn.commit()
 for rows in df.itertuples():
     canteen = rows.name
     seat = rows.seat
-    #print(canteen)
+    # print(canteen)
+
+    # 数据矫正偏移(前5次的误差)
+    sum_3 = 0.0
+    cnt_3 = 0
+    for j in range(1, 6):
+        fro_dt = now_dt-datetime.timedelta(minutes=j*2)
+        result = curs.execute(
+            "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
+        real_ip = 0.0
+        for tmp in result:
+            real_ip += tmp[0]
+            cnt_2 += 1
+            break
+        if real_ip > 0:  # 如果存在记录
+            result = curs.execute(
+                "SELECT IP FROM forecast WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
+            for tmp in result:
+                sum_3 += (real_ip-(tmp[0]*1.0))/real_ip  # 相对误差
+                cnt_3 += 1
+    delta = 0.0
+    if cnt_3 > 0:
+        delta = sum_3/cnt_3
+
     for i in range(1, 720):
         nxt_dt = now_dt+datetime.timedelta(minutes=2*i)
         # 前5天同一时间
@@ -92,26 +116,6 @@ for rows in df.itertuples():
                 cnt_2 += 1
                 break
 
-        # 数据矫正(前5次的误差)
-        sum_3 = 0.0
-        cnt_3 = 0
-        for j in range(1, 6):
-            fro_dt = nxt_dt-datetime.timedelta(minutes=j*2)
-            result = curs.execute(
-                "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
-            real_ip = 0.0
-            for tmp in result:
-                real_ip += tmp[0]
-                cnt_2 += 1
-                break
-            if real_ip > 0:  # 如果存在记录
-                result = curs.execute(
-                    "SELECT IP FROM forecast WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
-                for tmp in result:
-                    sum_3 += real_ip
-                    sum_3 -= tmp[0]
-                    cnt_3 += 1
-
         # 数据预测
         forcast_ip = 0.0
         if cnt_1 > 0:
@@ -120,10 +124,6 @@ for rows in df.itertuples():
             forcast_ip += (sum_2/cnt_2)*0.6
         elif cnt_1 > 0:
             forcast_ip += (sum_1/cnt_1)*0.6
-
-        delta = 0.0
-        if cnt_3 > 0:
-            delta = sum_3/cnt_3
 
         SQL = "INSERT INTO forecast (DATETIME,NAME,IP,SEAT,delta) VALUES("\
             + "'"+str(nxt_dt)+"',"\
