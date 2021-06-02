@@ -69,17 +69,16 @@ for rows in df.itertuples():
     seat = rows.seat
     # print(canteen)
 
-    # 数据矫正偏移(前5次的误差)
+    # 数据矫正偏移(前6次的误差)
     sum_3 = 0.0
     cnt_3 = 0
-    for j in range(1, 6):
+    for j in range(6):
         fro_dt = now_dt-datetime.timedelta(minutes=j*2)
         result = curs.execute(
             "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
         real_ip = 0.0
         for tmp in result:
-            real_ip += tmp[0]
-            cnt_2 += 1
+            real_ip = tmp[0]
             break
         if real_ip > 0:  # 如果存在记录
             result = curs.execute(
