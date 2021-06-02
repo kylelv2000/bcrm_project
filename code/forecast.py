@@ -33,7 +33,7 @@ now_dt = datetime.datetime.strptime(df.index[0], '%Y-%m-%d %H:%M')
 
 
 def delOldData():
-    delta = datetime.timedelta(hours=12)
+    delta = datetime.timedelta(days=1)
     perlen = 19
     while True:
         SQL = "select * from forecast limit 0,%d" % perlen
@@ -135,3 +135,4 @@ for rows in df.itertuples():
         conn.commit()
 
 conn.close()
+print(1.0/2)
