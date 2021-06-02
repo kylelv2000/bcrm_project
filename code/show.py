@@ -5,7 +5,7 @@ import pandas as pd
 import sqlite3
 import datetime
 
-from pyecharts.charts import Bar, Line, Pie, Timeline, Geo, Page, Map
+from pyecharts.charts import Bar, Line, Grid, Timeline, Geo, Page, Map
 from pyecharts import options as opts
 
 
@@ -27,9 +27,17 @@ curs = conn.cursor()
 
 
 # 生成折线图
-part1 = Timeline(init_opts=opts.InitOpts(width='3600px',
-                                         height='500px',
-                                         page_title="食堂实时拥挤度变化"))
+part1 = (Timeline(init_opts=opts.InitOpts(width='3600px',
+                                          height='700px',
+                                          page_title="食堂实时拥挤度变化")
+                  )
+         .add_schema(pos_left='3%',
+                     pos_right='3%',
+                     is_auto_play=False,
+                     label_opts=opts.LabelOpts(is_show=True,
+                                               position="bottom")
+                     )
+         )
 
 
 # 读取数据
@@ -42,67 +50,75 @@ for rows in df.itertuples():
     dt_begin = datetime.datetime(today.year, today.month, today.day, 6)
     dt_now = datetime.datetime.today()
     # print(dt_begin)
-    time_list = ["%02d:%02d"%((dt_begin+datetime.timedelta(minutes=2*i)).hour,
-                            (dt_begin+datetime.timedelta(minutes=2*i)).minute) for i in range(540)]
+    time_list = ["%02d:%02d" % ((dt_begin+datetime.timedelta(minutes=2*i)).hour,
+                                (dt_begin+datetime.timedelta(minutes=2*i)).minute) for i in range(540)]
 
     # 读取当天真实访问数据 6:00-now
     SQL = "SELECT * FROM canteens WHERE DATETIME >= '%s' AND DATETIME <= '%s' AND NAME = '%s';" % (
         str(dt_begin), str(dt_now), canteen)
     result = curs.execute(SQL)
 
-    t_time=dt_begin
+    t_time = dt_begin
     for row in result:
-        while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')>t_time:
-            t_time+=datetime.timedelta(minutes=2)
+        while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') > t_time:
             if t_time == dt_begin:
                 real_data.append(0.0)
             else:
                 real_data.append(real_data[-1])
+            t_time += datetime.timedelta(minutes=2)
         real_data.append(row[2]*100.0/row[4])
-        t_time+=datetime.timedelta(minutes=2)
+        t_time += datetime.timedelta(minutes=2)
 
     # 读取当天预测数据 6:00-23:58
     SQL = "SELECT * FROM forecast WHERE DATETIME >= '%s' AND DATETIME <= '%s' AND NAME = '%s';" % (
         str(dt_begin), str(dt_begin+datetime.timedelta(hours=18)), canteen)
     result = curs.execute(SQL)
-    
-    t_time=dt_begin
+
+    t_time = dt_begin
     for row in result:
-        while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')>t_time:
-            t_time+=datetime.timedelta(minutes=2)
+        while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') > t_time:
             if t_time == dt_begin:
                 forecast_data.append(0.0)
             else:
-                forecast_data.append(real_data[-1])
+                forecast_data.append(forecast_data[-1])
+            t_time += datetime.timedelta(minutes=2)
         forecast_data.append((row[3]*100.0/row[4])*(1.0+row[5]))
-        t_time+=datetime.timedelta(minutes=2)
-    #print(real_data)
+        t_time += datetime.timedelta(minutes=2)
+    # print(real_data)
     line = (
         Line()
         .add_xaxis(time_list)
         .add_yaxis("拥挤度变化",
                    y_axis=real_data,
-                   is_symbol_show=False,
-                   color="red",
+                   # is_symbol_show=False,
+                   color='gray',
                    label_opts=opts.LabelOpts(is_show=False),
                    is_smooth=True)
         .add_yaxis("拥挤度预测",
                    y_axis=forecast_data,
-                   is_symbol_show=False,
-                   color="grey",
+                   # is_symbol_show=False,
+                   color='red',
                    label_opts=opts.LabelOpts(is_show=False),
                    is_smooth=True)
+
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="{}实时拥挤度变化".format(canteen),
+            title_opts=opts.TitleOpts(title="{}实时拥挤度变化（就餐人数/总座位数*100%）".format(canteen),
                                       pos_left='center', pos_top='5%'),
+            tooltip_opts=opts.TooltipOpts(trigger="axis"),
+            datazoom_opts=opts.DataZoomOpts(range_start=int(50.0*len(real_data)/len(forecast_data)+0.5),
+                                            range_end=100,
+                                            pos_bottom='11%'),
         )
     )
-    part1.add(line, canteen)
+    grid = (
+        Grid().add(line, grid_opts=opts.GridOpts(pos_bottom="20%"))
+    )
+    part1.add(grid, canteen)
 
 
 conn.close()
 
 
-pages = Page(page_title="人口自然增长率", layout=Page.SimplePageLayout)
+pages = Page(page_title="北大各食堂实时数据分析", layout=Page.SimplePageLayout)
 pages.add(part1)
 pages.render("../web/show.html")

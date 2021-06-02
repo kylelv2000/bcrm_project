@@ -135,4 +135,3 @@ for rows in df.itertuples():
         conn.commit()
 
 conn.close()
-print(1.0/2)
