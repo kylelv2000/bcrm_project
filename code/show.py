@@ -5,7 +5,7 @@ import pandas as pd
 import sqlite3
 import datetime
 
-from pyecharts.charts import Bar, Line, Grid, Timeline, Geo, Page, Map
+from pyecharts.charts import Bar, Line, Grid, Timeline, Gauge, Page
 from pyecharts import options as opts
 
 
@@ -22,7 +22,7 @@ conn = sqlite3.connect(
     sys.path[0]+'/../data/shows.db', check_same_thread=False)
 curs = conn.cursor()
 
-# 过去*天早中晚餐峰值时间，
+# 过去*天早中晚餐峰值时间
 # 当天人数变化+预测，各个食堂当前拥挤度
 
 
@@ -39,7 +39,7 @@ part1 = (Timeline(init_opts=opts.InitOpts(width='3600px',
                      )
          )
 
-
+c = []
 # 读取数据
 for rows in df.itertuples():
     real_data = []
@@ -90,13 +90,11 @@ for rows in df.itertuples():
         .add_xaxis(time_list)
         .add_yaxis("拥挤度变化",
                    y_axis=real_data,
-                   # is_symbol_show=False,
                    color='gray',
                    label_opts=opts.LabelOpts(is_show=False),
                    is_smooth=True)
         .add_yaxis("拥挤度预测",
                    y_axis=forecast_data,
-                   # is_symbol_show=False,
                    color='red',
                    label_opts=opts.LabelOpts(is_show=False),
                    is_smooth=True)
@@ -111,14 +109,66 @@ for rows in df.itertuples():
         )
     )
     grid = (
-        Grid().add(line, grid_opts=opts.GridOpts(pos_bottom="20%"))
+        Grid(init_opts=opts.InitOpts(width='3600px',
+                                     height='700px',
+                                     page_title="食堂实时拥挤度变化")).add(line, grid_opts=opts.GridOpts(pos_bottom="20%"))
     )
+    c.append(grid)
     part1.add(grid, canteen)
 
 
 conn.close()
 
 
+# 统计实时拥挤程度
+extent = []
+names = []
+
+for i in range(len(df)):
+    extent.append(int(100.0*df.iloc[i, 0]/df.iloc[i, 2]+0.5))
+    names.append(df.iloc[i, 1])
+    # 分页储存
+
+    g = (
+        Gauge(
+            init_opts=opts.InitOpts(width="600px",
+                                    height="600px",
+                                    page_title="{}实时数据分析".format(df.iloc[i, 1])
+                                    )
+        )
+        .add("", [("", int(100.0*df.iloc[i, 0]/df.iloc[i, 2]+0.5))])
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title="{}实时拥挤度".format(df.iloc[i, 1]),
+                                      pos_left='center',
+                                      pos_top='5%'),
+            tooltip_opts=opts.TooltipOpts(
+                is_show=True, formatter="{a} <br/>{b} : {c}%"),
+            legend_opts=opts.LegendOpts(is_show=False),
+        )
+    )
+    page = Page(page_title="{}食堂实时数据分析".format(
+        df.iloc[i, 1]), layout=Page.SimplePageLayout)
+    page.add(g, c[i])
+    page.render("../web/c%d.html" % i)
+
+
+# 实时数据柱状图
+bar = (Bar(init_opts=opts.InitOpts(width='2500px',
+                                   height='800px'))
+       .add_xaxis(names)
+       .add_yaxis("", extent)
+       .set_global_opts(
+    title_opts=opts.TitleOpts(title="{} 实时各食堂饱和度（就餐人数/总座位数*100%）".format(df.index[i]),
+                              pos_left='center', pos_top='10%'),
+    xaxis_opts=opts.AxisOpts(
+        axislabel_opts={"rotate": 30},
+        split_number=1
+    ),
+    visualmap_opts=opts.VisualMapOpts(
+        min_=0, max_=100, is_piecewise=True)
+)
+)
+
 pages = Page(page_title="北大各食堂实时数据分析", layout=Page.SimplePageLayout)
-pages.add(part1)
-pages.render("../web/show.html")
+pages.add(part1, bar)
+pages.render("../web/shows.html")
