@@ -78,7 +78,7 @@ for rows in df.itertuples():
             "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
         real_ip = 0.0
         for tmp in result:
-            real_ip = tmp[0]
+            real_ip += tmp[0]
             break
         if real_ip > 0:  # 如果存在记录
             result = curs.execute(

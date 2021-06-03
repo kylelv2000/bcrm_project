@@ -82,7 +82,7 @@ for rows in df.itertuples():
             else:
                 forecast_data.append(forecast_data[-1])
             t_time += datetime.timedelta(minutes=2)
-        if(row[3]>10):
+        if(row[3]>30):
             forecast_data.append((row[3]*100.0/row[4])*(1.0+row[5]))
         else:
             forecast_data.append((row[3]*100.0/row[4]))
@@ -106,7 +106,7 @@ for rows in df.itertuples():
             title_opts=opts.TitleOpts(title="{}实时拥挤度变化（就餐人数/总座位数*100%）".format(canteen),
                                       pos_left='center', pos_top='5%'),
             tooltip_opts=opts.TooltipOpts(trigger="axis"),
-            datazoom_opts=opts.DataZoomOpts(range_start=int(50.0*len(real_data)/len(forecast_data)+0.5),
+            datazoom_opts=opts.DataZoomOpts(range_start=int((len(real_data)*50.0)/len(forecast_data)+0.5),
                                             range_end=100,
                                             pos_bottom='11%'),
         )
