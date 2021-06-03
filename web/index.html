@@ -1,49 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0;">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0, shrink-to-fit=no;">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="./css/bootstrap.min.css">
     <link rel="stylesheet" href="./css/my.css">
-    <title>赛事 | PKU-CPC 北京大学“新工科”第十九届“AcWing杯”程序设计竞赛</title>
+    <title>北大各食堂实时数据分析</title>
 </head>
 
 <body>
-
+    
     <div class="container">
         <div class="card content">
             <div class="card-body">
-                <h5 class="card-title">PKU-CPC 北京大学“新工科”第十九届“AcWing杯”程序设计竞赛</h5>
+                <h3 class="card-title">北大各食堂实时数据分析</h3>
 
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand" href="#">导航</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                      <span class="navbar-toggler-icon"></span>
+                    </button>
+                  
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                      <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                          <a class="nav-link" href="shows.html">综合数据 <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item dropdown">
+                          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-expanded="false">
+                            北大食堂
+                          </a>
+                          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="c0.html">燕南美食</a>
+                            <a class="dropdown-item" href="c1.html">燕南地下</a>
+                            <a class="dropdown-item" href="c10.html">学五食堂</a>
+                            <a class="dropdown-item" href="c11.html">学一食堂</a>
+                            <a class="dropdown-item" href="c15.html">家园一层</a>
+                            <a class="dropdown-item" href="c16.html">家园二层</a>
+                            <a class="dropdown-item" href="c17.html">家园三层</a>
+                            <a class="dropdown-item" href="c18.html">家园四层</a>
+                            <a class="dropdown-item" href="c2.html">农园一层</a>
+                            <a class="dropdown-item" href="c3.html">农园二层</a>
+                            <a class="dropdown-item" href="c4.html">农园三层</a>
+                            <a class="dropdown-item" href="c8.html">勺园一层</a>
+                            <a class="dropdown-item" href="c9.html">勺园二层</a>
+                            <a class="dropdown-item" href="c5.html">畅春园一层</a>
+                            <a class="dropdown-item" href="c6.html">畅春园二层</a>
+                            <a class="dropdown-item" href="c7.html">畅春园三层</a>
+                            <a class="dropdown-item" href="c12.html">中关园食堂</a>
+                            <a class="dropdown-item" href="c13.html">万柳食堂</a>
+                            <a class="dropdown-item" href="c14.html">成府园食堂</a>
+                            
+                          </div>
+                        </li>
+                      </ul>
+                      <li class="form-inline my-2 my-lg-0">
+                        <a class="nav-link" href="https://kylelv.com">我的博客</a>
+                      </li>
+                    </div>
+                  </nav>
                 <div class="alert alert-info" role="alert">
-                    北京大学“新工科”第十九届“AcWing杯”程序设计竞赛报名开始啦！
+                    本数据采用北大门户公开数据，每两分钟更新一次（更新时间为6:00-23:58）！
                 </div>
                 <p class="card-text">
                 </p>
                 <pre
-                    style="white-space: pre-wrap;word-wrap: break-word;">    北京大学“新工科”程序设计竞赛（简称北大PKU-CPC校内赛），是由北京大学信息科学技术学院主办的、北京大学信息科学领域规模最大、水平最高的专业赛事。该项赛事同时肩负着选拔优秀学生参加国际ICPC比赛的重任；腾讯、Citadel、Google等国内外著名公司均曾是本赛事的赞助商；赛事规模逐年扩大，校外参赛队来自清华大学等全国多所高校。</pre>
-
-                <pre style="white-space: pre-wrap;word-wrap: break-word;">    随着知名度的不断提高，北京大学程序设计竞赛已成为高校中具有强大影响力的大型赛事。</pre>
-
+                    style="white-space: pre-wrap;word-wrap: break-word;">    我们对于全校所有食堂的数据进行了跟踪分析，并实时采集和修正信息，实现了实时预测每个食堂的拥挤度变化，以及可以直观的表示出拥挤程度。并且我们根据这些信息也发现了一些很有趣的事情。</pre>
+                </pre>
+                <h5>信息预处理</h5>
                 <pre
-                    style="white-space: pre-wrap;word-wrap: break-word;">    2021年是中国共产党成立100周年，在这一新的历史起点上，北京大学正走在建设世界一流大学的最前线，吹响了新工科建设的号角；作为北京大学信息与工程科学部的主要院系，信息科学技术学院迎来了崭新的机遇和挑战。因此，今年举办的北京大学“新工科”第十九届“AcWing杯”程序设计竞赛，有着更加特殊的意义。参赛选手们将在此次比赛中强化基础知识，精进算法技能，培养实践能力，在献礼建党百年和开启北大新工科建设的画卷上写下青春靓丽的一笔！</pre>
+                    style="white-space: pre-wrap;word-wrap: break-word;">    我们基于爬虫手段，每分钟对于网站进行访问，从而更新数据，并将数据存入</pre>
                 </pre>
             </div>
         </div>
     </div>
-
-    <div id="blank"></div>
-
-
-
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
     <footer class="footer">
         <div class="container">
             <span class="text-muted">Copyright ©2021 - kylelv.com</span>
         </div>
     </footer>
-
     <script type="text/javascript" src="./css/snow.min.js"></script>
     <script type="text/javascript">
         var snow = new Snow();
