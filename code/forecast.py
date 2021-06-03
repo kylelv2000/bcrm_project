@@ -91,39 +91,55 @@ for rows in df.itertuples():
         delta = sum_3/cnt_3
     delta/=2
     
+    # 前5天同一时间
+    sum_1=[0.0 for _ in range(721)]
+    cnt_1=[0 for _ in range(721)]
+    for j in range(1,6):
+        fro_dt=now_dt-datetime.timedelta(days=j)
+        result = curs.execute("SELECT * FROM canteens WHERE NAME = '%s' \
+            AND DATETIME > '%s' AND DATETIME < '%s';" % (canteen, str(fro_dt),str(fro_dt+datetime.timedelta(days=1))))
+        i=0
+        for row in result:
+            if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < fro_dt:
+                continue
+            while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') > fro_dt:
+                i+=1
+                fro_dt=fro_dt+datetime.timedelta(minutes=2)
+            sum_1[i]+=row[2]
+            cnt_1[i]+=1
+            i+=1
+            fro_dt=fro_dt+datetime.timedelta(minutes=2)
+
+    # 前4周同一星期和时间
+    sum_2=[0.0 for _ in range(720)]
+    cnt_2=[0 for _ in range(720)]
+    for j in range(1, 5):
+        fro_dt=now_dt-datetime.timedelta(weeks=j)
+        result = curs.execute("SELECT * FROM canteens WHERE NAME = '%s' \
+            AND DATETIME > '%s' AND DATETIME < '%s';" % (canteen, str(fro_dt),str(fro_dt+datetime.timedelta(days=1))))
+        i=0
+        for row in result:
+            if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < fro_dt:
+                continue
+            while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') > fro_dt:
+                i+=1
+                fro_dt=fro_dt+datetime.timedelta(minutes=2)
+            sum_2[i]+=row[2]
+            cnt_2[i]+=1
+            i+=1
+            fro_dt=fro_dt+datetime.timedelta(minutes=2)
+    
+    # 数据预测
     for i in range(1, 720):
         nxt_dt = now_dt+datetime.timedelta(minutes=2*i)
-        # 前5天同一时间
-        sum_1 = 0.0
-        cnt_1 = 0
-        for j in range(1, 6):
-            fro_dt = nxt_dt-datetime.timedelta(days=j)
-            result = curs.execute(
-                "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
-            for tmp in result:
-                sum_1 += tmp[0]
-                cnt_1 += 1
-                break
-        # 前4周同一星期和时间
-        sum_2 = 0.0
-        cnt_2 = 0
-        for j in range(1, 5):
-            fro_dt = nxt_dt-datetime.timedelta(weeks=j)
-            result = curs.execute(
-                "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
-            for tmp in result:
-                sum_2 += tmp[0]
-                cnt_2 += 1
-                break
-
-        # 数据预测
+        
         forcast_ip = 0.0
-        if cnt_1 > 0:
-            forcast_ip += (sum_1/cnt_1)*0.4
-        if cnt_2 > 0:
-            forcast_ip += (sum_2/cnt_2)*0.6
-        elif cnt_1 > 0:
-            forcast_ip += (sum_1/cnt_1)*0.6
+        if cnt_1[i] > 0:
+            forcast_ip += (sum_1[i]/cnt_1[i])*0.4
+        if cnt_2[i] > 0:
+            forcast_ip += (sum_2[i]/cnt_2[i])*0.6
+        elif cnt_1[i] > 0:
+            forcast_ip += (sum_1[i]/cnt_1[i])*0.6
 
         SQL = "INSERT INTO forecast (DATETIME,NAME,IP,SEAT,delta) VALUES("\
             + "'"+str(nxt_dt)+"',"\
@@ -133,6 +149,6 @@ for rows in df.itertuples():
             + str(delta) +\
             ")"
         curs.execute(SQL)
-        conn.commit()
-
+        
+conn.commit()
 conn.close()

@@ -60,6 +60,8 @@ for rows in df.itertuples():
 
     t_time = dt_begin
     for row in result:
+        if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < t_time:
+            continue
         while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') > t_time:
             if t_time == dt_begin:
                 real_data.append(0.0)
@@ -76,6 +78,8 @@ for rows in df.itertuples():
 
     t_time = dt_begin
     for row in result:
+        if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < t_time:
+            continue
         while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') > t_time:
             if t_time == dt_begin:
                 forecast_data.append(0.0)
