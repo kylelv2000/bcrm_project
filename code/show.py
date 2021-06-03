@@ -82,7 +82,10 @@ for rows in df.itertuples():
             else:
                 forecast_data.append(forecast_data[-1])
             t_time += datetime.timedelta(minutes=2)
-        forecast_data.append((row[3]*100.0/row[4])*(1.0+row[5]))
+        if(row[3]>10):
+            forecast_data.append((row[3]*100.0/row[4])*(1.0+row[5]))
+        else:
+            forecast_data.append((row[3]*100.0/row[4]))
         t_time += datetime.timedelta(minutes=2)
     # print(real_data)
     line = (

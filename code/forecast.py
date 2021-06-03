@@ -69,10 +69,10 @@ for rows in df.itertuples():
     seat = rows.seat
     # print(canteen)
 
-    # 数据矫正偏移(前6次的误差)
+    # 数据矫正偏移(前10次的误差)
     sum_3 = 0.0
     cnt_3 = 0
-    for j in range(6):
+    for j in range(10):
         fro_dt = now_dt-datetime.timedelta(minutes=j*2)
         result = curs.execute(
             "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
@@ -89,7 +89,8 @@ for rows in df.itertuples():
     delta = 0.0
     if cnt_3 > 0:
         delta = sum_3/cnt_3
-
+    delta/=2
+    
     for i in range(1, 720):
         nxt_dt = now_dt+datetime.timedelta(minutes=2*i)
         # 前5天同一时间

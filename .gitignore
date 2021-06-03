@@ -1,4 +1,6 @@
 data/
 auto_run.sh
 doc/
-web/
+web/*
+!web/index.html
+!web/css
