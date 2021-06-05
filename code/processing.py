@@ -19,6 +19,7 @@ if(a['time'] == fro_a['time']):
     sys.exit()
 f1.close()
 
+# 保存最新json文件
 f2 = open('../data/latest.json', 'w')
 f2.write(json.dumps(a))
 f2.close()

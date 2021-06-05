@@ -18,11 +18,12 @@ f.close()
 df = pd.DataFrame(a['rows'], index=[a['time']]*len(a['rows']))
 df.drop(df.columns[3], axis=1, inplace=True)
 
+# 连接数据库
 conn = sqlite3.connect(
     sys.path[0]+'/../data/shows.db', check_same_thread=False)
 curs = conn.cursor()
 
-# 过去*天早中晚餐峰值时间
+
 # 当天人数变化+预测，各个食堂当前拥挤度
 
 
@@ -46,6 +47,7 @@ for rows in df.itertuples():
     forecast_data = []
     canteen = rows.name
     seat = rows.seat
+    # 得到当天信息
     today = datetime.date.today()
     dt_begin = datetime.datetime(today.year, today.month, today.day, 6)
     dt_now = datetime.datetime.today()
@@ -59,7 +61,9 @@ for rows in df.itertuples():
     result = curs.execute(SQL)
 
     t_time = dt_begin
+    # 遍历数据
     for row in result:
+        # 如果数据和现在枚举不对，即可能数据丢失或者重复，我们对于丢失的数据用之前的信息代替
         if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < t_time:
             continue
         while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') > t_time:
@@ -68,6 +72,7 @@ for rows in df.itertuples():
             else:
                 real_data.append(real_data[-1])
             t_time += datetime.timedelta(minutes=2)
+        # 得到拥挤度的百分数
         real_data.append(row[2]*100.0/row[4])
         t_time += datetime.timedelta(minutes=2)
 
@@ -78,6 +83,7 @@ for rows in df.itertuples():
 
     t_time = dt_begin
     for row in result:
+        # 如果数据和现在枚举不对，即可能数据丢失或者重复，我们对于丢失的数据用之前的信息代替
         if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < t_time:
             continue
         while datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') > t_time:
@@ -86,12 +92,15 @@ for rows in df.itertuples():
             else:
                 forecast_data.append(forecast_data[-1])
             t_time += datetime.timedelta(minutes=2)
-        if(row[3]>30):
+        # 得到预测拥挤度百分比
+        if(row[3] > 30):  # 如果人数大于30我们才进行误差的修正（即利用之前的相对误差信息）
             forecast_data.append((row[3]*100.0/row[4])*(1.0+row[5]))
         else:
             forecast_data.append((row[3]*100.0/row[4]))
         t_time += datetime.timedelta(minutes=2)
     # print(real_data)
+
+    # 我们利用预测信息和实际数据生成折线图
     line = (
         Line()
         .add_xaxis(time_list)
