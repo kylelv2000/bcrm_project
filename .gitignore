@@ -4,3 +4,4 @@ doc/
 web/*
 !web/index.html
 !web/css
+!web/pic
