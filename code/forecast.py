@@ -35,7 +35,7 @@ now_dt = datetime.datetime.strptime(df.index[0], '%Y-%m-%d %H:%M')
 
 def delOldData():
     delta = datetime.timedelta(days=1)  # 我们保存1天内的数据
-    perlen = 19  # 19个食堂，因此一个时间有19条数据
+    perlen = 21  # 21个食堂，因此一个时间有21条数据
     while True:
         SQL = "select * from forecast limit 0,%d" % perlen
         result = curs.execute(SQL)
@@ -82,7 +82,7 @@ for rows in df.itertuples():
         for tmp in result:
             real_ip += tmp[0]
             break
-        if real_ip > 0:  # 如果存在记录
+        if real_ip > 30:  # 如果存在记录，且人数大于30
             result = curs.execute(
                 "SELECT IP FROM forecast WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
             for tmp in result:
