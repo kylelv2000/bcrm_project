@@ -93,7 +93,7 @@ for rows in df.itertuples():
                 forecast_data.append(forecast_data[-1])
             t_time += datetime.timedelta(minutes=2)
         # 得到预测拥挤度百分比
-        if(row[3] > 30):  # 如果人数大于30我们才进行误差的修正（即利用之前的相对误差信息）
+        if 1==0 and (row[3] > 30):  # 如果人数大于30我们才进行误差的修正（即利用之前的相对误差信息）
             forecast_data.append((row[3]*100.0/row[4])*(1.0+row[5]))
         else:
             forecast_data.append((row[3]*100.0/row[4]))
