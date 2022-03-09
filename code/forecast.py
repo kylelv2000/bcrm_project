@@ -69,25 +69,25 @@ conn.commit()
 for rows in df.itertuples():
     canteen = rows.name
     seat = rows.seat
-    # print(canteen)
+    print(canteen)
 
     # 数据矫正偏移(前10次的误差)
     sum_3 = 0.0
     cnt_3 = 0
-    for j in range(10):
-        fro_dt = now_dt-datetime.timedelta(minutes=j*2)
-        result = curs.execute(
-            "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
-        real_ip = 0.0
-        for tmp in result:
-            real_ip += tmp[0]
-            break
-        if real_ip > 30:  # 如果存在记录，且人数大于30
-            result = curs.execute(
-                "SELECT IP FROM forecast WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
-            for tmp in result:
-                sum_3 += (real_ip-(tmp[0]*1.0))/real_ip  # 相对误差
-                cnt_3 += 1
+    # for j in range(10):
+    #     fro_dt = now_dt-datetime.timedelta(minutes=j*2)
+    #     result = curs.execute(
+    #         "SELECT IP FROM canteens WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
+    #     real_ip = 0.0
+    #     for tmp in result:
+    #         real_ip += tmp[0]
+    #         break
+    #     if real_ip > 30:  # 如果存在记录，且人数大于30
+    #         result = curs.execute(
+    #             "SELECT IP FROM forecast WHERE NAME = '%s' AND DATETIME = '%s';" % (canteen, str(fro_dt)))
+    #         for tmp in result:
+    #             sum_3 += (real_ip-(tmp[0]*1.0))/real_ip  # 相对误差
+    #             cnt_3 += 1
     delta = 0.0
     # 取均值
     if cnt_3 > 0:
@@ -97,13 +97,27 @@ for rows in df.itertuples():
     # 前5天同一时间
     sum_1 = [0.0 for _ in range(720)]  # 对于每一时刻记录均值
     cnt_1 = [0 for _ in range(720)]
+
+    fro_dt = now_dt-datetime.timedelta(days=5)
+    result = curs.execute("SELECT * FROM canteens WHERE NAME = '%s' \
+        AND DATETIME > '%s' AND DATETIME < '%s';" % (canteen, str(fro_dt), str(fro_dt+datetime.timedelta(days=5))))
+    result=list(result)
+
     for j in range(1, 6):
-        fro_dt = now_dt-datetime.timedelta(days=j)
+        fro_dt = now_dt-datetime.timedelta(days=6-j)
         # 得到该24h内所有数据
-        result = curs.execute("SELECT * FROM canteens WHERE NAME = '%s' \
-            AND DATETIME > '%s' AND DATETIME < '%s';" % (canteen, str(fro_dt), str(fro_dt+datetime.timedelta(days=1))))
+        # result = curs.execute("SELECT * FROM canteens WHERE NAME = '%s' \
+            # AND DATETIME > '%s' AND DATETIME < '%s';" % (canteen, str(fro_dt), str(fro_dt+datetime.timedelta(days=1))))
         i = 0
-        for row in result:
+
+        rc=0
+        result_len=len(result)
+        while rc<result_len:
+            row = result[rc]
+            if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') >= now_dt-datetime.timedelta(days=5-j):
+                break
+            rc=rc+1
+        # for row in result:
             # 如果数据和现在枚举不对，即可能数据丢失或者重复
             if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < fro_dt:
                 continue
@@ -115,15 +129,18 @@ for rows in df.itertuples():
             i += 1
             fro_dt = fro_dt+datetime.timedelta(minutes=2)
 
-    # 前4周同一星期和时间
+    # 前2周同一星期和时间
     sum_2 = [0.0 for _ in range(720)]  # 对于每一时刻记录均值
     cnt_2 = [0 for _ in range(720)]
-    for j in range(1, 5):
+
+    
+    for j in range(1, 3):
         fro_dt = now_dt-datetime.timedelta(weeks=j)
         # 得到该24h内所有数据
         result = curs.execute("SELECT * FROM canteens WHERE NAME = '%s' \
             AND DATETIME > '%s' AND DATETIME < '%s';" % (canteen, str(fro_dt), str(fro_dt+datetime.timedelta(days=1))))
         i = 0
+        result=list(result)
         for row in result:
             # 如果数据和现在枚举不对，即可能数据丢失或者重复
             if datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < fro_dt:
